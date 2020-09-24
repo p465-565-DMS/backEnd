@@ -11,7 +11,7 @@ if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
 }
 
 const corsOptions =  {
-  origin: 'http://localhost:3000'
+  origin: 'https://hermes-delivery-hub.herokuapp.com/'
 };
 
 app.use(cors(corsOptions));
@@ -57,5 +57,5 @@ app.use(function(err, req, res, next){
   return res.status(err.status).json({ message: err.message });
 });
 
-app.listen(3010);
-console.log('Listening on http://localhost:3010');
+app.listen('https://backend-hermes-delivery-hub.herokuapp.com/');
+console.log('Listening on https://backend-hermes-delivery-hub.herokuapp.com/');
