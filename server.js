@@ -57,5 +57,5 @@ app.use(function(err, req, res, next){
   return res.status(err.status).json({ message: err.message });
 });
 
-app.listen('https://backend-hermes-delivery-hub.herokuapp.com');
-console.log('Listening on https://backend-hermes-delivery-hub.herokuapp.com');
+app.listen(3010);
+console.log('Listening on 3010');
