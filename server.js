@@ -11,7 +11,7 @@ if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
 }
 
 const corsOptions =  {
-  origin: 'https://hermes-delivery-hub.herokuapp.com/'
+  origin: 'https://hermes-delivery-hub.herokuapp.com'
 };
 
 app.use(cors(corsOptions));
@@ -27,7 +27,7 @@ const checkJwt = jwt({
 
   // Validate the audience and the issuer.
   audience: process.env.AUTH0_AUDIENCE,
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+  issuer: `https://${process.env.AUTH0_DOMAIN}`,
   algorithms: ['RS256']
 });
 
@@ -57,5 +57,5 @@ app.use(function(err, req, res, next){
   return res.status(err.status).json({ message: err.message });
 });
 
-app.listen('https://backend-hermes-delivery-hub.herokuapp.com/');
-console.log('Listening on https://backend-hermes-delivery-hub.herokuapp.com/');
+app.listen('https://backend-hermes-delivery-hub.herokuapp.com');
+console.log('Listening on https://backend-hermes-delivery-hub.herokuapp.com');
