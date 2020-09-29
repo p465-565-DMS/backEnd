@@ -4,6 +4,7 @@ const jwt = require('express-jwt');
 const jwtAuthz = require('express-jwt-authz');
 const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
+const { Pool, Client } = require('pg');
 require('dotenv').config();
 
 if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
@@ -56,6 +57,38 @@ app.use(function(err, req, res, next){
   console.error(err.stack);
   return res.status(err.status).json({ message: err.message });
 });
+
+
+
+//Connecting the database to the backend
+
+//Connecting to the database so we can query it, etc.
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'hermes',
+  password: 'a',
+  port: 5432,
+})
+
+//Does the same thing, but mimics how the client would do it...
+const client = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'hermes',
+  password: 'a',
+  port: 5432,
+})
+
+client.connect()
+client.query('SELECT * FROM Users;', (err, res) => {
+  console.log(err, res)
+  client.end()
+})
+
+
+//TODO: Implement an abstraction for the database for non-sql experts to use...
+
 
 app.listen(process.env.PORT || 5000);
 console.log('Listening');
