@@ -45,20 +45,21 @@ CREATE TABLE Package (packageId text,
                       packageSLocation text,
                       deadline text,
                       packageELocation text,
+                      packageDeliveryStatus text,
                       PRIMARY KEY (packageId)
                       );
   INSERT INTO Package VALUES ('00001', 'Shark Fin Soup', 'These shark fins are grown from premium shark fin trees, and is 100% humane', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408') ON CONFLICT DO NOTHING;
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'UNSHIPPED') ON CONFLICT DO NOTHING;
   INSERT INTO Package VALUES ('00002', 'Ghost Grenades', 'These grenades are 100% effective against ghosts, guarenteed.', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408') ON CONFLICT DO NOTHING;
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'UNSHIPPED') ON CONFLICT DO NOTHING;
   INSERT INTO Package VALUES ('00003', 'Excalibur', 'Can only be delivered by the king.', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408') ON CONFLICT DO NOTHING;
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408','IN TRANSIT') ON CONFLICT DO NOTHING;
   INSERT INTO Package VALUES ('00004', 'Gun', 'Get rid of your competition with this convienent weapon. Usable in almost any scenario!', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408') ON CONFLICT DO NOTHING;
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'IN TRANSIT') ON CONFLICT DO NOTHING;
   INSERT INTO Package VALUES ('00005', 'Magic Karate Belt', 'Wear this belt and magically gain karate powers rivaling any Bruce Lee baddie.', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408') ON CONFLICT DO NOTHING;
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'DELIVERED') ON CONFLICT DO NOTHING;
   INSERT INTO Package VALUES ('00006', 'Shark Fin Soup', 'These shark fins are grown from premium shark fin trees, and is 100% humane', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408') ON CONFLICT DO NOTHING;
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'DELIVERED') ON CONFLICT DO NOTHING;
 
 
 CREATE TABLE CompanyRelations (compId int,

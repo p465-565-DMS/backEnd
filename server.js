@@ -93,15 +93,7 @@ client = new Client({
 });
 
 
-
-
-
-
-
-
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
-
-
 class ezQueryBuilder {
     getUsersFromCompany(companyName){
       return "SELECT u.* FROM CompanyRelations cr, Users u, Company c WHERE cr.userId = u.userId AND c.compId = cr.compId AND c.compName = '" + companyName + "';"
@@ -123,21 +115,38 @@ class ezQueryBuilder {
       return "SELECT p.* FROM CustomerToPackage ctp, Users u, Package p WHERE u.userName = '" + username + "' AND ctp.userId = u.userId AND p.packageId = ctp.packageId;"
     }
 
-    //to be added
-    //update a user's address
-    //update a package's location
-    //update a package's ending location
-    //update a delivery status
-    //update a user's affiliation with the company
-    //update a customer's packages, en route
+    updateUsersAddress(username, address){
+      return "UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';"
+    }
 
+    updatePackageStartingLocation(location, packageId){
+      return "UPDATE Package SET packageSLocation = '" + location + "' WHERE packageId = '" + packageId + "';"
+    }
+
+    updatePackageEndingLocation(){
+      return "UPDATE Package SET packageELocation = '" + location + "' WHERE packageId = '" + packageId + "';"
+    }
+
+    updatePackageDeliveryStatus(packageDeliveryStatus, packageId){
+      return "UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = '" + packageId + "';"
+    }
+
+    /*
+    updateUserAffiliation(){
+
+    }
+
+    updateUsersPackageStatus(){
+
+    }
+    */
 }
 
 //Example here...
 let easyQB = new ezQueryBuilder();
 
 client.connect()
-client.query(easyQB.getACustomersPackages('llapelle'), (err, res) => {
+client.query(easyQB.updatePackageStartingLocation('00001','Radio, Somewhere'), (err, res) => {
   console.log(res)
   //Do whatever you want to with the data here...
   client.end()
