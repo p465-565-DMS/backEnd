@@ -16,6 +16,7 @@ const corsOptions =  {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json());
 
 const checkJwt = jwt({
   // Dynamically provide a signing key based on the [Key ID](https://tools.ietf.org/html/rfc7515#section-4.1.4) header parameter ("kid") and the signing keys provided by the JWKS endpoint.
@@ -52,13 +53,12 @@ app.get('/api/private-scoped', checkJwt, checkScopes, function(req, res) {
   });
 });
 
+
 app.use(function(err, req, res, next){
   console.log(req.headers)
   console.error(err.stack);
   return res.status(err.status).json({ message: err.message });
 });
-
-
 
 //Connecting the database to the backend
 //Connecting to the database so we can query it, etc.
@@ -70,28 +70,13 @@ const pool = new Pool({
   port: 5432,
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'hermes',
-    password: 'a',
+    password: 'adidas123',
     port: 5432,
 });
-
 
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
 class ezQueryBuilder {
@@ -131,6 +116,10 @@ class ezQueryBuilder {
       return "UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = '" + packageId + "';"
     }
 
+    insertNewUser(fname, lname, username, pass, role, add){
+      return "INSERT INTO USERS(fname, lname, username, userpassword, roleid, address) VALUES (" + fname + " , " + lname + " , " + username + " , " + pass + " , " + role + " , " + add + ");"
+    }
+
     /*
     updateUserAffiliation(){
 
@@ -146,8 +135,33 @@ class ezQueryBuilder {
 let easyQB = new ezQueryBuilder();
 
 client.connect()
-client.query(easyQB.updatePackageStartingLocation('00001','Radio, Somewhere'), (err, res) => {
-  console.log(res)
-  //Do whatever you want to with the data here...
-  client.end()
-})
+// client.query(easyQB.updatePackageStartingLocation('00001','Radio, Somewhere'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   //client.end()
+// })
+// client.query(easyQB.getUsersFromCompany("Vees Viral Shippers"), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   //client.end()
+// })
+
+app.post('/api/profile', checkJwt, function(req, res) {
+  client.query(easyQB.insertNewUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, res) => {
+      console.log(res)
+    })
+  res.json({
+    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
+  });
+});
+
+app.get('/api/company', checkJwt, function(req, res) {
+  client.query(easyQB.getAllCompanies(), (err, res) => {
+      console.log(res)
+    })
+  res.json({
+    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
+  });
+});
+
+app.listen(process.env.PORT || 5000);
