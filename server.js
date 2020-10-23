@@ -81,70 +81,215 @@ client = new Client({
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
 class ezQueryBuilder {
     getUsersFromCompany(companyName){
-      return "SELECT u.* FROM CompanyRelations cr, Users u, Company c WHERE cr.userId = u.userId AND c.compId = cr.compId AND c.compName = '" + companyName + "';"
+      console.log("SELECT DISTINCT u.* FROM CompanyRelations cr, Users u, Company c WHERE cr.userId = u.userId AND c.compId = cr.compId AND c.compName = '" + companyName + "';");
+      return "SELECT DISTINCT u.* FROM CompanyRelations cr, Users u, Company c WHERE cr.userId = u.userId AND c.compId = cr.compId AND c.compName = '" + companyName + "';"
     }
 
     getAllCompanies(){
-      return 'SELECT compName FROM Company;';
+      console.log('SELECT DISTINCT compName FROM Company;');
+      return 'SELECT DISTINCT compName FROM Company;';
     }
 
     getAUsersPackages(username){
-      return "SELECT p.* FROM Users u, PackageRelations pr, Package p WHERE pr.userId = u.userId AND pr.packageId = p.packageId AND u.userName = '" + username + "';";
+      console.log("SELECT DISTINCT p.* FROM Users u, PackageRelations pr, Package p WHERE pr.userId = u.userId AND pr.packageId = p.packageId AND u.userName = '" + username + "';");
+      return "SELECT DISTINCT p.* FROM Users u, PackageRelations pr, Package p WHERE pr.userId = u.userId AND pr.packageId = p.packageId AND u.userName = '" + username + "';";
     }
 
     getACompanysPackages(companyName){
-      return "SELECT p.* FROM Company c, PackageRelations pr, CompanyRelations cr, Package p WHERE c.compName = '" + companyName + "' AND c.compId = cr.compId AND pr.userId = cr.userId AND pr.packageId = p.packageId;";
+      console.log("SELECT DISTINCT p.* FROM Company c, PackageRelations pr, CompanyRelations cr, Package p WHERE c.compName = '" + companyName + "' AND c.compId = cr.compId AND pr.userId = cr.userId AND pr.packageId = p.packageId;")
+      return "SELECT DISTINCT p.* FROM Company c, PackageRelations pr, CompanyRelations cr, Package p WHERE c.compName = '" + companyName + "' AND c.compId = cr.compId AND pr.userId = cr.userId AND pr.packageId = p.packageId;";
     }
 
     getACustomersPackages(username){
-      return "SELECT p.* FROM CustomerToPackage ctp, Users u, Package p WHERE u.userName = '" + username + "' AND ctp.userId = u.userId AND p.packageId = ctp.packageId;"
+      console.log("SELECT DISTINCT p.* FROM CustomerToPackage ctp, Users u, Package p WHERE u.userName = '" + username + "' AND ctp.userId = u.userId AND p.packageId = ctp.packageId;");
+      return "SELECT DISTINCT p.* FROM CustomerToPackage ctp, Users u, Package p WHERE u.userName = '" + username + "' AND ctp.userId = u.userId AND p.packageId = ctp.packageId;"
     }
 
     updateUsersAddress(username, address){
+      console.log("UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';")
       return "UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';"
     }
 
-    updatePackageStartingLocation(location, packageId){
-      return "UPDATE Package SET packageSLocation = '" + location + "' WHERE packageId = '" + packageId + "';"
+    updatePackageStartingLocation(packageId, location){
+      console.log("UPDATE Package SET packageSLocation = '" + location + "' WHERE packageId = " + packageId + ";");
+      return "UPDATE Package SET packageSLocation = '" + location + "' WHERE packageId = " + packageId + ";"
     }
 
-    updatePackageEndingLocation(){
-      return "UPDATE Package SET packageELocation = '" + location + "' WHERE packageId = '" + packageId + "';"
+    updatePackageEndingLocation(packageId, location){
+      console.log("UPDATE Package SET packageELocation = '" + location + "' WHERE packageId = " + packageId + ";");
+      return "UPDATE Package SET packageELocation = '" + location + "' WHERE packageId = " + packageId + ";"
     }
 
-    updatePackageDeliveryStatus(packageDeliveryStatus, packageId){
-      return "UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = '" + packageId + "';"
+    updatePackageDeliveryStatus(packageId, packageDeliveryStatus){
+      console.log("UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = " + packageId + ";")
+      return "UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = " + packageId + ";"
     }
 
-    insertNewUser(fname, lname, username, pass, role, add){
-      return "INSERT INTO USERS(fname, lname, username, userpassword, roleid, address) VALUES (" + fname + " , " + lname + " , " + username + " , " + pass + " , " + role + " , " + add + ");"
+    createACompany(compName, creatorId, logo, description, address){
+      return "INSERT INTO Company (compName, creatorId, logo, description, address) VALUES ('" + compName + "', " + creatorId + ", '" + logo + "', '" + description +"', '" + address + "')";
     }
 
-    /*
-    updateUserAffiliation(){
-
+    createAUser(fname, lname, username, password, roleId, address){
+      console.log("INSERT INTO Users (fname, lName, userName, userPassword, roleId, address) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '" +password+"', "+roleId+", '"+address+"');");
+      return "INSERT INTO Users (fname, lName, userName, userPassword, roleId, address) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '" +password+"', "+roleId+", '"+address+"');";
     }
 
-    updateUsersPackageStatus(){
-
+    createUserRelationToCompany(compId, userId){
+      return "INSERT INTO CompanyRelations VALUES ("+compId +", "+userId+");";
     }
-    */
+
+    createAPackage(title, desc, sloc, deadline, eloc, status){
+      return "INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('"+title+"','"+desc+"','"+sloc+"','"+deadline+"','"+eloc+"', '"+status+"');";
+    }
+
+    createAPackageRelation(userid, packageid){
+      return "INSERT INTO PackageRelations VALUES ('"+userid +"', '"+packageid+"');";
+    }
+
+    createACustomerToPackageRelation(userid, packageid){
+      return "INSERT INTO CustomerToPackage VALUES ('"+userid +"', '"+packageid+"');";
+    }
+
 }
 
 //Example here...
 let easyQB = new ezQueryBuilder();
 
-client.connect()
-// client.query(easyQB.updatePackageStartingLocation('00001','Radio, Somewhere'), (err, res) => {
+
+
+//THIS CAN ALL BE DELETED IF YOU WANT, ITS JUST TESTING EACH QUERY BEING BUILT TO ENSURE CORRECTNESS
+
+
+////SECTION 1 - Retrieving Stuff
+      // easyQB.getUsersFromCompany();
+      // easyQB.getAllCompanies();
+      // easyQB.getAUsersPackages();
+      // easyQB.getACompanysPackages();
+      // easyQB.getACustomersPackages();
+
+// client.connect()
+// client.query(easyQB.getUsersFromCompany("Presidential Shark Industries"), (err, res) => {
 //   console.log(res)
 //   //Do whatever you want to with the data here...
-//   //client.end()
+//   client.end()
 // })
-// client.query(easyQB.getUsersFromCompany("Vees Viral Shippers"), (err, res) => {
+
+// client.connect()
+// client.query(easyQB.getAllCompanies(), (err, res) => {
 //   console.log(res)
 //   //Do whatever you want to with the data here...
-//   //client.end()
+//   client.end()
 // })
+
+// client.connect()
+// client.query(easyQB.getAUsersPackages("lewi"), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.getACompanysPackages("Presidential Shark Industries"), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.getACustomersPackages("llapelle"), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+
+////SECTION 2 - Updating Stuff
+  // updateUsersAddress('llapelle', 'Bakersfield, TX')
+  // updatePackageStartingLocation('1', 'Lukenbach Texas');
+  // updatePackageEndingLocation('1', 'Jackson, TN');
+  // updatePackageDeliveryStatus('1', 'IN TRANSIT');
+
+// client.connect()
+// client.query(easyQB.updateUsersAddress('llapelle', 'Bakersfield, TX'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.updatePackageStartingLocation('1', 'Lukenbach Texas'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.updatePackageEndingLocation('1', 'Jackson TN'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.updatePackageDeliveryStatus('1', 'IN TRANSIT'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+
+
+
+////SECTION 3 - Inserting Stuff
+
+
+
+// client.connect()
+// client.query(easyQB.createACompany('Thingers', '1', 'logo.png', 'lorem ipsum etc', 'Deep River, MS'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.createAUser('Test', 'test', 't', 'lorem ipsum etc', 1,'address'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.createUserRelationToCompany(4,12), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+// client.connect()
+// client.query(easyQB.createAPackage('testa', 'oof', 'wpw', '1/1/2020', 'alabama', 'in transit'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+
+// client.connect()
+// client.query(easyQB.createAPackageRelation('1','1'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
+
+////SECTION 4 - Deleting Stuff
+//Not done yet, because we aren't using it for the demo. Writing the rest of the queries took a deceptively long time.
+
+
+
+
+
+
+
+
 
 app.post('/api/profile', checkJwt, function(req, res) {
   client.query(easyQB.insertNewUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, res) => {
