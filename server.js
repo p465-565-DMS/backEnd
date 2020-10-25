@@ -150,6 +150,19 @@ class ezQueryBuilder {
       return "INSERT INTO CustomerToPackage VALUES ('"+userid +"', '"+packageid+"');";
     }
 
+    getPackageCurrentLocation(packageId){
+      return "SELECT currentLocation FROM Package WHERE packageId = " + packageId;
+    }
+
+    getAllCompanyCustomers(compName){
+      return "SELECT DISTINCT customers.* FROM CustomerToPackage ctp, PackageRelations pr, Users u, CompanyRelations cr, Company c, Users customers WHERE ctp.packageId = pr.packageId AND pr.userId = u.userId AND u.userId = cr.userId AND cr.compId = c.compId AND customers.userId = ctp.userId AND c.compName = "+"'"+compName+"';"
+    }
+
+    getAUsersPackagesThatAreDelivered(username){
+      return "SELECT DISTINCT p.* FROM Users u, PackageRelations pr, Package p WHERE pr.userId = u.userId AND p.packageDeliveryStatus = 'DELIVERED' AND pr.packageId = p.packageId AND u.userName = '" + username + "';";
+    }
+
+
 }
 
 //Example here...
@@ -282,6 +295,14 @@ let easyQB = new ezQueryBuilder();
 
 ////SECTION 4 - Deleting Stuff
 //Not done yet, because we aren't using it for the demo. Writing the rest of the queries took a deceptively long time.
+
+client.connect()
+client.query(easyQB.getAUsersPackagesThatAreDelivered('naharm'), (err, res) => {
+  console.log(res)
+  //Do whatever you want to with the data here...
+  client.end()
+})
+
 
 
 
