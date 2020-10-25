@@ -46,20 +46,33 @@ CREATE TABLE Package (packageId SERIAL,
                       deadline text,
                       packageELocation text,
                       packageDeliveryStatus text,
+                      packageWeight int,
+                      packageSize int,
+                      speedOfDelivery int,
+                      rate int,
+                      currentLocation text,
                       PRIMARY KEY (packageId)
                       );
-  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('Shark Fin Soup', 'These shark fins are grown from premium shark fin trees, and is 100% humane', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'UNSHIPPED') ON CONFLICT DO NOTHING;
-  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('Ghost Grenades', 'These grenades are 100% effective against ghosts, guarenteed.', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'UNSHIPPED') ON CONFLICT DO NOTHING;
-  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('Excalibur', 'Can only be delivered by the king.', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408','IN TRANSIT') ON CONFLICT DO NOTHING;
-  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('Gun', 'Get rid of your competition with this convienent weapon. Usable in almost any scenario!', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'IN TRANSIT') ON CONFLICT DO NOTHING;
-  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('Magic Karate Belt', 'Wear this belt and magically gain karate powers rivaling any Bruce Lee baddie.', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'DELIVERED') ON CONFLICT DO NOTHING;
-  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('Shark Fin Soup', 'These shark fins are grown from premium shark fin trees, and is 100% humane', '
-                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'DELIVERED') ON CONFLICT DO NOTHING;
+
+
+  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus, packageWeight,
+                      packageSize, speedOfDelivery, rate, currentLocation) VALUES ('Shark Fin Soup', 'These shark fins are grown from premium shark fin trees, and is 100% humane', '
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'UNSHIPPED', 15, 33, 2, 4, 'Broadersfield, NH') ON CONFLICT DO NOTHING;
+  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus, packageWeight,
+                      packageSize, speedOfDelivery, rate, currentLocation) VALUES ('Ghost Grenades', 'These grenades are 100% effective against ghosts, guarenteed.', '
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'UNSHIPPED', 0, 0, 2, 4, 'Broadersfield, NH') ON CONFLICT DO NOTHING;
+  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus, packageWeight,
+                      packageSize, speedOfDelivery, rate, currentLocation) VALUES ('Excalibur', 'Can only be delivered by the king.', '
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408','IN TRANSIT', 80, 20, 4, 4, 'Portsmouth, NH') ON CONFLICT DO NOTHING;
+  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus, packageWeight,
+                      packageSize, speedOfDelivery, rate, currentLocation) VALUES ('Gun', 'Get rid of your competition with this convienent weapon. Usable in almost any scenario!', '
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'IN TRANSIT',  4, 4, 1, 1, 'Broadersfield, NH') ON CONFLICT DO NOTHING;
+  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus, packageWeight,
+                      packageSize, speedOfDelivery, rate, currentLocation) VALUES ('Magic Karate Belt', 'Wear this belt and magically gain karate powers rivaling any Bruce Lee baddie.', '
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'DELIVERED',  1, 1, 1, 2, 'Broadersfield, NH') ON CONFLICT DO NOTHING;
+  INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus, packageWeight,
+                      packageSize, speedOfDelivery, rate, currentLocation) VALUES ('Shark Fin Soup', 'These shark fins are grown from premium shark fin trees, and is 100% humane', '
+                      502 E Kirkwood Ave', '10/11/2021', '430 E Kirkwood Ave # 18, Bloomington, IN 47408', 'DELIVERED', 20, 10, 5, 4, 'Boston, MA') ON CONFLICT DO NOTHING;
 
 
 CREATE TABLE CompanyRelations (compId int,
@@ -94,7 +107,6 @@ CREATE TABLE PackageRelations (userId int,
   INSERT INTO PackageRelations VALUES (9, 6) ON CONFLICT DO NOTHING;
   INSERT INTO PackageRelations VALUES (4, 1) ON CONFLICT DO NOTHING;
   INSERT INTO PackageRelations VALUES (5, 4) ON CONFLICT DO NOTHING;
-  INSERT INTO PackageRelations VALUES (6, 3) ON CONFLICT DO NOTHING;
 
 CREATE TABLE CustomerToPackage(userId int,
                                packageId int,
