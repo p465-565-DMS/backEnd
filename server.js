@@ -78,6 +78,7 @@ client = new Client({
     port: 5432,
 });
 
+client.connect()
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
 class ezQueryBuilder {
     getUsersFromCompany(companyName){
@@ -306,25 +307,31 @@ let easyQB = new ezQueryBuilder();
 
 
 app.post('/api/profile', checkJwt, function(req, res) {
-  client.connect()
-  client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, res) => {
-      console.log(res)
-      client.end()
+  const setRow = async() =>{
+    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.command)
+        res.status(200).json(result.command)}
     })
-  res.json({
-    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
-  });
+  }
+  setRow()
 });
 
 app.get('/api/company', checkJwt, function(req, res) {
-  client.connect()
-  client.query(easyQB.getUsersFromCompany(req.query.name), (err, res) => {
-    console.log(res)
-    client.end()
+  const fetchRow = async() =>{
+    await client.query(easyQB.getUsersFromCompany(req.query.name), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.rows)
+        res.status(200).json(result.rows)}
     })
-  res.json({
-    message: 'Hello from a private endpoint! You need to be authenticated to see this.'
-  });
+  }
+  fetchRow()
 });
 
 app.listen(process.env.PORT || 5000);
