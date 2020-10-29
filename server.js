@@ -58,17 +58,17 @@ app.use(function(err, req, res, next){
   console.log(req.headers)
   console.error(err.stack);
   return res.status(err.status).json({ message: err.message });
-});
+}); 
 
 //Connecting the database to the backend
 //Connecting to the database so we can query it, etc.
-const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'hermes',
-  password: 'a',
-  port: 5432,
-})
+// const pool = new Pool({
+//   user: 'postgres',
+//   host: 'localhost',
+//   database: 'hermes',
+//   password: 'a',
+//   port: 5432,
+// })
 
 client = new Client({
     user: 'postgres',
@@ -296,25 +296,20 @@ let easyQB = new ezQueryBuilder();
 ////SECTION 4 - Deleting Stuff
 //Not done yet, because we aren't using it for the demo. Writing the rest of the queries took a deceptively long time.
 
-client.connect()
-client.query(easyQB.getAUsersPackagesThatAreDelivered('naharm'), (err, res) => {
-  console.log(res)
-  //Do whatever you want to with the data here...
-  client.end()
-})
-
-
-
-
-
-
-
+// client.connect()
+// client.query(easyQB.getUsersFromCompany('Vees Viral Shippers'), (err, res) => {
+//   console.log(res)
+//   //Do whatever you want to with the data here...
+//   client.end()
+// })
 
 
 
 app.post('/api/profile', checkJwt, function(req, res) {
-  client.query(easyQB.insertNewUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, res) => {
+  client.connect()
+  client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, res) => {
       console.log(res)
+      client.end()
     })
   res.json({
     message: 'Hello from a private endpoint! You need to be authenticated to see this.'
@@ -322,8 +317,10 @@ app.post('/api/profile', checkJwt, function(req, res) {
 });
 
 app.get('/api/company', checkJwt, function(req, res) {
-  client.query(easyQB.getAllCompanies(), (err, res) => {
-      console.log(res)
+  client.connect()
+  client.query(easyQB.getUsersFromCompany(req.query.name), (err, res) => {
+    console.log(res)
+    client.end()
     })
   res.json({
     message: 'Hello from a private endpoint! You need to be authenticated to see this.'
