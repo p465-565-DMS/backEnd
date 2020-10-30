@@ -78,7 +78,6 @@ client = new Client({
     port: 5432,
 });
 
-client.connect()
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
 class ezQueryBuilder {
     getUsersFromCompany(companyName){
@@ -306,8 +305,9 @@ let easyQB = new ezQueryBuilder();
 
 
 
-app.post('/api/profile', checkJwt, function(req, res) {
+app.post('/fill-info', checkJwt, function(req, res) {
   const setRow = async() =>{
+    client.connect()
     await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, result) => {
       if (err){
         console.log(err.stack)
@@ -315,6 +315,7 @@ app.post('/api/profile', checkJwt, function(req, res) {
       } else {
         console.log(result.command)
         res.status(200).json(result.command)}
+      client.end()
     })
   }
   setRow()
@@ -322,6 +323,7 @@ app.post('/api/profile', checkJwt, function(req, res) {
 
 app.get('/api/company', checkJwt, function(req, res) {
   const fetchRow = async() =>{
+    client.connect()
     await client.query(easyQB.getUsersFromCompany(req.query.name), (err, result) => {
       if (err){
         console.log(err.stack)
@@ -329,6 +331,7 @@ app.get('/api/company', checkJwt, function(req, res) {
       } else {
         console.log(result.rows)
         res.status(200).json(result.rows)}
+        client.end()
     })
   }
   fetchRow()
