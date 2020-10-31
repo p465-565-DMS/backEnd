@@ -12,7 +12,7 @@ if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
 }
 
 const corsOptions =  {
-  origin: 'https://hermes-delivery-hub.herokuapp.com'
+  origin: ['http://hermes-delivery-hub.herokuapp.com','http://localhost:3000']
 };
 
 app.use(cors(corsOptions));
@@ -77,6 +77,7 @@ client = new Client({
     password: 'adidas123',
     port: 5432,
 });
+client.connect()
 
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
 class ezQueryBuilder {
@@ -307,7 +308,6 @@ let easyQB = new ezQueryBuilder();
 
 app.post('/fill-info', checkJwt, function(req, res) {
   const setRow = async() =>{
-    client.connect()
     await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, result) => {
       if (err){
         console.log(err.stack)
@@ -315,7 +315,6 @@ app.post('/fill-info', checkJwt, function(req, res) {
       } else {
         console.log(result.command)
         res.status(200).json(result.command)}
-      client.end()
     })
   }
   setRow()
@@ -323,7 +322,6 @@ app.post('/fill-info', checkJwt, function(req, res) {
 
 app.get('/api/company', checkJwt, function(req, res) {
   const fetchRow = async() =>{
-    client.connect()
     await client.query(easyQB.getUsersFromCompany(req.query.name), (err, result) => {
       if (err){
         console.log(err.stack)
@@ -331,7 +329,6 @@ app.get('/api/company', checkJwt, function(req, res) {
       } else {
         console.log(result.rows)
         res.status(200).json(result.rows)}
-        client.end()
     })
   }
   fetchRow()
