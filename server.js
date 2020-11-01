@@ -130,11 +130,18 @@ class ezQueryBuilder {
       return "INSERT INTO Company (compName, creatorId, logo, description, address) VALUES ('" + compName + "', " + creatorId + ", '" + logo + "', '" + description +"', '" + address + "')";
     }
 
-    createAUser(fname, lname, username, password, roleId, address){
-      console.log("INSERT INTO Users (fname, lName, userName, userPassword, roleId, address) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '" +password+"', "+roleId+", '"+address+"');");
-      return "INSERT INTO Users (fname, lName, userName, userPassword, roleId, address) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '" +password+"', "+roleId+", '"+address+"');";
+    createAUser(fname, lname, username, role, address, phone, email, state, city, zipcode){
+      console.log("INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+zipcode +"');");
+      return "INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+zipcode +"');";
     }
 
+    createAnAdmin(username, cname, spkg, mpkg, lpkg, elec, deli, heavy, doc, other, express, normal){
+      return "INSERT INTO deliveryAdmin(userid, companyname, spkg, mpkg, lpkg, electronic, delicate, heavy, doc, other, express, normal) VALUES((SELECT userid from users where username='"+username+"'), '"+cname+"','"+spkg+"','"+mpkg+"','"+lpkg+"','"+elec+"','"+deli+"','"+heavy+"','"+doc+"','"+other+"','"+express+"','"+normal+"');";
+    } 
+
+    createADriver(username, cname, lno){
+      return "INSERT INTO deliverydriver(userid, companyname, licenseno) VALUES((SELECT userid from users where username='"+username+"'),'"+cname+"','"+lno+"');";
+    }
     createUserRelationToCompany(compId, userId){
       return "INSERT INTO CompanyRelations VALUES ("+compId +", "+userId+");";
     }
@@ -307,9 +314,10 @@ let easyQB = new ezQueryBuilder();
 
 
 app.post('/fill-info', checkJwt, function(req, res) {
+  if(req.body.role  == "user") {
   const setRow = async() =>{
-    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.userpassword, req.body.roleid, req.body.address), (err, result) => {
-      if (err){
+    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.zipcode), (err, result) => {
+      if (err){         
         console.log(err.stack)
         res.status(400).json(err)
       } else {
@@ -318,6 +326,55 @@ app.post('/fill-info', checkJwt, function(req, res) {
     })
   }
   setRow()
+  }
+  else if(req.body.role == "admin"){
+    const setRow = async() => {
+      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.zipcode), (err, result) => {
+        if (err){         
+          console.log(err.stack)
+          res.status(400).json(err)
+        } else {
+          console.log(result.command)
+          const setAdmin = async() =>{
+            await client.query(easyQB.createAnAdmin(req.body.username, req.body.admin.cname, req.body.admin.spkg, req.body.admin.mpkg, req.body.admin.lpkg, req.body.admin.elec, req.body.admin.deli, req.body.admin.heavy, req.body.admin.doc, req.body.admin.other, req.body.admin.express, req.body.admin.normal), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1.command)
+                res.status(200).json(result1.command)}
+            })
+          }
+          setAdmin()
+          }
+      })
+    }
+    setRow()
+  }
+  else {
+    const setRow = async() => {
+      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.zipcode), (err, result) => {
+        if (err){         
+          console.log(err.stack)
+          res.status(400).json(err)
+        } else {
+          console.log(result.command)
+          const setDriver = async() =>{
+            await client.query(easyQB.createADriver(req.body.username, req.body.driver.cname, req.body.driver.lno), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1.command)
+                res.status(200).json(result1.command)}
+            })
+          }
+          setDriver()
+          }
+      })
+    }
+    setRow()
+  }
 });
 
 app.get('/api/company', checkJwt, function(req, res) {
