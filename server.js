@@ -4,6 +4,7 @@ const jwt = require('express-jwt');
 const jwtAuthz = require('express-jwt-authz');
 const jwksRsa = require('jwks-rsa');
 const cors = require('cors');
+const { get_jwt_claims } = require('./utils/jwtClaims');
 const { Pool, Client } = require('pg');
 require('dotenv').config();
 
@@ -106,6 +107,9 @@ class ezQueryBuilder {
       return "SELECT DISTINCT p.* FROM CustomerToPackage ctp, Users u, Package p WHERE u.userName = '" + username + "' AND ctp.userId = u.userId AND p.packageId = ctp.packageId;"
     }
 
+    getUser(email){
+      return "SELECT username FROM Users WHERE email = '"+email+"';"
+    }
     updateUsersAddress(username, address){
       console.log("UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';")
       return "UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';"
@@ -130,9 +134,9 @@ class ezQueryBuilder {
       return "INSERT INTO Company (compName, creatorId, logo, description, address) VALUES ('" + compName + "', " + creatorId + ", '" + logo + "', '" + description +"', '" + address + "')";
     }
 
-    createAUser(fname, lname, username, role, address, phone, email, state, city, zipcode){
-      console.log("INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+zipcode +"');");
-      return "INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+zipcode +"');";
+    createAUser(fname, lname, username, role, address, phone, email, state, city, link, zipcode){
+      console.log("INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, googlelink, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+link+"', '"+zipcode +"');");
+      return "INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, googlelink, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+link+"', '"+zipcode +"');";
     }
 
     createAnAdmin(username, cname, spkg, mpkg, lpkg, elec, deli, heavy, doc, other, express, normal){
@@ -316,7 +320,7 @@ let easyQB = new ezQueryBuilder();
 app.post('/fill-info', checkJwt, function(req, res) {
   if(req.body.role  == "user") {
   const setRow = async() =>{
-    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.zipcode), (err, result) => {
+    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
       if (err){         
         console.log(err.stack)
         res.status(400).json(err)
@@ -327,9 +331,9 @@ app.post('/fill-info', checkJwt, function(req, res) {
   }
   setRow()
   }
-  else if(req.body.role == "admin"){
+  else if(req.body.role == "dadmin"){
     const setRow = async() => {
-      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.zipcode), (err, result) => {
+      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
         if (err){         
           console.log(err.stack)
           res.status(400).json(err)
@@ -353,7 +357,7 @@ app.post('/fill-info', checkJwt, function(req, res) {
   }
   else {
     const setRow = async() => {
-      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.zipcode), (err, result) => {
+      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
         if (err){         
           console.log(err.stack)
           res.status(400).json(err)
@@ -375,6 +379,21 @@ app.post('/fill-info', checkJwt, function(req, res) {
     }
     setRow()
   }
+});
+
+app.get('/api/me', checkJwt, function(req, res){
+  const fetchRow = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUser(email), (err, result) => {
+      if(result.rows.length > 0){
+        res.status(200).json(result.rows)
+      } else {
+        res.status(400).json()
+      }
+    })
+  }
+  fetchRow()
 });
 
 app.get('/api/company', checkJwt, function(req, res) {
