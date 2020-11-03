@@ -108,7 +108,10 @@ class ezQueryBuilder {
     }
 
     getUser(email){
-      return "SELECT username FROM Users WHERE email = '"+email+"';"
+      return "SELECT * FROM Users WHERE email = '"+email+"';"
+    }
+    updateUser(email, fname, lname, phone, streetAddress, city, state, zipcode, googlelink){
+      return "UPDATE Users SET fname = '"+fname+"', lname = '"+lname+"', phone = '"+phone+"', address = '"+streetAddress+"', city = '"+city+"', state = '"+state+"', zipcode = '"+zipcode+"', googlelink = '"+googlelink+"' WHERE email = '"+email+"';";
     }
     updateUsersAddress(username, address){
       console.log("UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';")
@@ -320,7 +323,7 @@ let easyQB = new ezQueryBuilder();
 app.post('/fill-info', checkJwt, function(req, res) {
   if(req.body.role  == "user") {
   const setRow = async() =>{
-    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
+    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
       if (err){         
         console.log(err.stack)
         res.status(400).json(err)
@@ -390,6 +393,19 @@ app.get('/api/me', checkJwt, function(req, res){
         res.status(200).json(result.rows)
       } else {
         res.status(400).json()
+      }
+    })
+  }
+  fetchRow()
+});
+
+app.post('/api/me', checkJwt, function(req, res){
+  const fetchRow = async() =>{
+    await client.query(easyQB.updateUser(req.body.email, req.body.fname, req.body.lname, req.body.phone, req.body.address.streetAddress, req.body.address.city, req.body.address.state, req.body.address.zip, req.body.address.googlelink), (err, result) => {
+      if(err){
+        res.status(400).json(err.stack)
+      } else {
+        res.status(200).json(result.rows)
       }
     })
   }
