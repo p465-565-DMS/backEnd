@@ -265,49 +265,6 @@ ALTER TABLE public.servicedetails_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.servicedetails_id_seq OWNED BY public.servicedetails.id;
 
-
---
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.users (
-    userid integer NOT NULL,
-    fname text NOT NULL,
-    lname text NOT NULL,
-    username text NOT NULL,
-    role text NOT NULL,
-    address text,
-    phone character varying,
-    email character varying,
-    state text,
-    city text,
-    zipcode character varying
-);
-
-
-ALTER TABLE public.users OWNER TO postgres;
-
---
--- Name: users_userid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.users_userid_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.users_userid_seq OWNER TO postgres;
-
---
--- Name: users_userid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.users_userid_seq OWNED BY public.users.userid;
-
-
 --
 -- Name: compid; Type: DEFAULT; Schema: public; Owner: postgres
 --
@@ -341,14 +298,6 @@ ALTER TABLE ONLY public.package ALTER COLUMN packageid SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public.servicedetails ALTER COLUMN id SET DEFAULT nextval('public.servicedetails_id_seq'::regclass);
-
-
---
--- Name: userid; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users ALTER COLUMN userid SET DEFAULT nextval('public.users_userid_seq'::regclass);
-
 
 --
 -- Data for Name: company; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -515,28 +464,6 @@ COPY public.servicedetails (id, adminid, spkg, mpkg, lpkg, electronic, delicate,
 
 SELECT pg_catalog.setval('public.servicedetails_id_seq', 1, false);
 
-
---
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.users (userid, fname, lname, username, role, address, phone, email, state, city, zipcode) FROM stdin;
-33	Viral	Prajapati	viralprajapati07	admin	720 S College Mall Rd	123456789	viralprajapati07@gmail.com	IN	Bloomington	47401
-34	John	johnson	jjson	user	555 S College Mall Rd	456789123	jjson@gmail.com	IN	Bloomington	47401
-35	Luke	Martin	lmartin	ddriver	721 S College Mall Rd	582146397	lmartin@gmail.com	IN	Bloomington	47401
-39	Viral	Prajapati	vkprajap	user	502 S Park Ridge Rd	123456789	vkprajap@iu.edu	IN	Bloomington	47401
-46	Viral	Prajapati	vkp	admin	502 S Park Ridge Rd	123456789	vkp@iu.edu	IN	Bloomington	47401
-49	Anshul	Vohra	ansvohra	driver	502 S Park Ridge Rd	123456789	ansvohrap@iu.edu	IN	Bloomington	47401
-\.
-
-
---
--- Name: users_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.users_userid_seq', 49, true);
-
-
 --
 -- Name: company_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -576,23 +503,6 @@ ALTER TABLE ONLY public.package
 ALTER TABLE ONLY public.servicedetails
     ADD CONSTRAINT servicedetails_pkey PRIMARY KEY (id);
 
-
---
--- Name: unique_username; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT unique_username UNIQUE (username);
-
-
---
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (userid);
-
-
 --
 -- Name: companyrelations_compid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
@@ -608,21 +518,6 @@ ALTER TABLE ONLY public.companyrelations
 ALTER TABLE ONLY public.customertopackage
     ADD CONSTRAINT customertopackage_packageid_fkey FOREIGN KEY (packageid) REFERENCES public.package(packageid);
 
-
---
--- Name: fk_dadmin; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.deliveryadmin
-    ADD CONSTRAINT fk_dadmin FOREIGN KEY (userid) REFERENCES public.users(userid);
-
-
---
--- Name: fk_ddriver; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.deliverydriver
-    ADD CONSTRAINT fk_ddriver FOREIGN KEY (userid) REFERENCES public.users(userid);
 
 
 --

@@ -75,7 +75,7 @@ client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'hermes',
-    password: 'adidas123',
+    password: 'postgres',
     port: 5432,
 });
 client.connect()
@@ -415,6 +415,21 @@ app.post('/api/me', checkJwt, function(req, res){
 app.get('/api/company', checkJwt, function(req, res) {
   const fetchRow = async() =>{
     await client.query(easyQB.getUsersFromCompany(req.query.name), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.rows)
+        res.status(200).json(result.rows)}
+    })
+  }
+  fetchRow()
+});
+
+app.post('/api/search', checkJwt, function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body)
+    await client.query((req.body), (err, result) => {
       if (err){
         console.log(err.stack)
         res.status(400).json(err)
