@@ -13,7 +13,7 @@ if (!process.env.AUTH0_DOMAIN || !process.env.AUTH0_AUDIENCE) {
 }
 
 const corsOptions =  {
-  origin: ['http://hermes-delivery-hub.herokuapp.com','http://localhost:3000']
+  origin: ['https://hermes-delivery-hub.herokuapp.com','http://localhost:3000']
 };
 
 app.use(cors(corsOptions));
@@ -109,6 +109,18 @@ class ezQueryBuilder {
 
     getUser(email){
       return "SELECT * FROM Users WHERE email = '"+email+"';"
+    }
+
+    getUserId(email){
+      return "SELECT userid FROM Users WHERE email = '"+email+"';"  
+    }
+
+    getCompany(uid){
+      return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
+    }
+
+    getEmployee(cname){
+      return "SELECT DISTINCT u.fname, u.lname, u.email, u.username, u.role, u.googlelink FROM users u, deliveryadmin da, deliverydriver dd WHERE dd.companyname ='"+cname+"' AND dd.userid = u.userid;"
     }
     updateUser(email, fname, lname, phone, streetAddress, city, state, zipcode, googlelink){
       return "UPDATE Users SET fname = '"+fname+"', lname = '"+lname+"', phone = '"+phone+"', address = '"+streetAddress+"', city = '"+city+"', state = '"+state+"', zipcode = '"+zipcode+"', googlelink = '"+googlelink+"' WHERE email = '"+email+"';";
@@ -311,9 +323,9 @@ let easyQB = new ezQueryBuilder();
 ////SECTION 4 - Deleting Stuff
 //Not done yet, because we aren't using it for the demo. Writing the rest of the queries took a deceptively long time.
 
-// client.connect()
-// client.query(easyQB.getUsersFromCompany('Vees Viral Shippers'), (err, res) => {
-//   console.log(res)
+// // client.connect()
+client.query(easyQB.getCompany('61'), (err, result) => {
+  console.log(result.rows[0].companyname)})
 //   //Do whatever you want to with the data here...
 //   client.end()
 // })
@@ -412,21 +424,47 @@ app.post('/api/me', checkJwt, function(req, res){
   fetchRow()
 });
 
-app.get('/api/company', checkJwt, function(req, res) {
-  const fetchRow = async() =>{
-    await client.query(easyQB.getUsersFromCompany(req.query.name), (err, result) => {
-      if (err){
-        console.log(err.stack)
-        res.status(400).json(err)
+app.get('/api/employees', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
       } else {
-        console.log(result.rows)
-        res.status(200).json(result.rows)}
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+          const fetchUsers = async() =>{
+            await client.query(easyQB.getCompany(uid), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1);
+                const cname = result1.rows[0].companyname;
+                const fetchEmployee = async() =>{
+                  await client.query(easyQB.getEmployee(cname), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                fetchEmployee()
+              }
+            })
+          }
+          fetchUsers()
+      }
     })
   }
-  fetchRow()
+  fetchRow1()
 });
 
-app.post('/api/search', checkJwt, function(req, res) {
+app.post('/api/search', function(req, res) {
   const fetchRow = async() =>{
     console.log(req.body.queryValue)
     await client.query((req.body.queryValue), (err, result) => {
