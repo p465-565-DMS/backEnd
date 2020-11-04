@@ -75,7 +75,7 @@ client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'hermes',
-    password: 'adidas123',
+    password: 'postgres',
     port: 5432,
 });
 client.connect()
@@ -426,7 +426,7 @@ app.get('/api/company', checkJwt, function(req, res) {
   fetchRow()
 });
 
-app.post('/api/search', checkJwt, function(req, res) {
+app.post('/api/search', function(req, res) {
   const fetchRow = async() =>{
     console.log(req.body.queryValue)
     await client.query((req.body.queryValue), (err, result) => {
