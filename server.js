@@ -75,7 +75,7 @@ client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'hermes',
-    password: 'adidas123',
+    password: 'postgres',
     port: 5432,
 });
 client.connect()
