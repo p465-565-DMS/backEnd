@@ -71,12 +71,18 @@ app.use(function(err, req, res, next){
 //   port: 5432,
 // })
 
-client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'hermes',
-    password: 'postgres',
-    port: 5432,
+// client = new Client({
+//     user: 'postgres',
+//     host: 'localhost',
+//     database: 'hermes',
+//     password: 'adidas123',
+//     port: 5432,
+// });
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 client.connect()
 
@@ -118,9 +124,9 @@ class ezQueryBuilder {
     getCompany(uid){
       return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
     }
-
+    
     getEmployee(cname){
-      return "SELECT DISTINCT u.fname, u.lname, u.email, u.username, u.role, u.googlelink FROM users u, deliveryadmin da, deliverydriver dd WHERE dd.companyname ='"+cname+"' AND dd.userid = u.userid;"
+      return "SELECT DISTINCT u.fname, u.lname, u.email, u.username, u.role, u.googlelink FROM users u, deliverydriver dd WHERE dd.companyname ='"+cname+"' AND dd.userid = u.userid;"
     }
     updateUser(email, fname, lname, phone, streetAddress, city, state, zipcode, googlelink){
       return "UPDATE Users SET fname = '"+fname+"', lname = '"+lname+"', phone = '"+phone+"', address = '"+streetAddress+"', city = '"+city+"', state = '"+state+"', zipcode = '"+zipcode+"', googlelink = '"+googlelink+"' WHERE email = '"+email+"';";
