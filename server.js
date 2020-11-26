@@ -71,19 +71,19 @@ app.use(function(err, req, res, next){
 //   port: 5432,
 // })
 
-// client = new Client({
-//     user: 'postgres',
-//     host: 'localhost',
-//     database: 'hermes',
-//     password: 'adidas123',
-//     port: 5432,
-// });
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'hermes',
+    password: 'adidas123',
+    port: 5432,
 });
+// const client = new Client({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: {
+//     rejectUnauthorized: false
+//   }
+// });
 client.connect()
 
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
@@ -124,13 +124,43 @@ class ezQueryBuilder {
     getCompany(uid){
       return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
     }
+
+    getAdmin(uid){
+      return "SELECT adminid FROM deliveryadmin WHERE userid = '"+uid+"';"
+    }
     
+    getAdminCompany(uid){
+      return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
+    }
+    
+    getDrivers(cname){
+      return "SELECT u.username FROM users u, deliverydriver d WHERE u.userid = d.userid AND d.companyname = '"+cname+"';";
+    }
+
+    getAdminPackages(aid){
+      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.packagedestination, p.deadline, p.packagespeed, p.packagetype, p.packageweight, p.packagesize, p.packagestatus, p.packageassigned, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.adminid = '"+aid+"';";
+    }
+
+    getAdminHistory(aid){
+      return "SELECT DISTINCT u.email, u.fname, p.packageid, p.packageassigned, p.packagestatus, p.trackingid, p.packagelocation, p.packagetype, p.price, p.review FROM users u, package p WHERE u.userid = p.userid AND p.adminid = '"+aid+"';";
+    }
+
+    getAdminServices(aid){
+      return "SELECT DISTINCT s.id, s.pspeed, s.ptype, s.psize, s.pweight, s.price FROM deliveryadmin a, servicedetails s WHERE s.adminid='"+aid+"';";
+    }
+
     getEmployee(cname){
       return "SELECT DISTINCT u.fname, u.lname, u.email, u.username, u.role, u.googlelink FROM users u, deliverydriver dd WHERE dd.companyname ='"+cname+"' AND dd.userid = u.userid;"
     }
+
     updateUser(email, fname, lname, phone, streetAddress, city, state, zipcode, googlelink){
       return "UPDATE Users SET fname = '"+fname+"', lname = '"+lname+"', phone = '"+phone+"', address = '"+streetAddress+"', city = '"+city+"', state = '"+state+"', zipcode = '"+zipcode+"', googlelink = '"+googlelink+"' WHERE email = '"+email+"';";
     }
+
+    updateOrders(packageid, driver){
+      return "UPDATE package SET packageassigned = '"+driver+"' WHERE packageid = '"+packageid+"';";
+    }
+
     updateUsersAddress(username, address){
       console.log("UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';")
       return "UPDATE Users SET address = '" + address + "' WHERE userName = '"+ username +"';"
@@ -151,8 +181,16 @@ class ezQueryBuilder {
       return "UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = " + packageId + ";"
     }
 
+    updateServices(id, speed, type, size, weight, price){
+      return "UPDATE servicedetails SET pspeed = '"+speed+"', "+"ptype = '"+type+"', "+"psize = '"+size+"', "+"pweight = '"+weight+"', "+"price = '"+price+"' WHERE id = '"+id+"';";
+    }
+
+    createService(speed, type, size, weight, price, aid){
+      return "INSERT INTO servicedetails (adminid, pspeed, ptype, psize, pweight, price) VALUES ('"+aid+"', '"+speed+"', '"+type+"', '"+size+"', '"+weight+"', '"+price+"');";
+    }
+
     createACompany(compName, creatorId, logo, description, address){
-      return "INSERT INTO Company (compName, creatorId, logo, description, address) VALUES ('" + compName + "', " + creatorId + ", '" + logo + "', '" + description +"', '" + address + "')";
+      return "INSERT INTO Company (compName, creatorId, logo, description, address) VALUES ('" + compName + "', " + creatorId + ", '" + logo + "', '" + description +"', '" + address + "');";
     }
 
     createAUser(fname, lname, username, role, address, phone, email, state, city, link, zipcode){
@@ -195,6 +233,9 @@ class ezQueryBuilder {
       return "SELECT DISTINCT p.* FROM Users u, PackageRelations pr, Package p WHERE pr.userId = u.userId AND p.packageDeliveryStatus = 'DELIVERED' AND pr.packageId = p.packageId AND u.userName = '" + username + "';";
     }
 
+    deleteServices(id){
+      return "DELETE FROM servicedetails WHERE id = '"+id+"';";
+    }
 
 }
 
@@ -330,8 +371,8 @@ let easyQB = new ezQueryBuilder();
 //Not done yet, because we aren't using it for the demo. Writing the rest of the queries took a deceptively long time.
 
 // // client.connect()
-client.query(easyQB.getCompany('61'), (err, result) => {
-  console.log(result.rows[0].companyname)})
+// client.query(easyQB.getCompany('61'), (err, result) => {
+//   console.log(result.rows[0].companyname)})
 //   //Do whatever you want to with the data here...
 //   client.end()
 // })
@@ -341,7 +382,7 @@ client.query(easyQB.getCompany('61'), (err, result) => {
 app.post('/fill-info', checkJwt, function(req, res) {
   if(req.body.role  == "user") {
   const setRow = async() =>{
-    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
+    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
       if (err){         
         console.log(err.stack)
         res.status(400).json(err)
@@ -430,7 +471,7 @@ app.post('/api/me', checkJwt, function(req, res){
   fetchRow()
 });
 
-app.get('/api/employees', checkJwt, function(req, res){
+app.get('/admin/employees', checkJwt, function(req, res){
   const fetchRow1 = async() =>{
     const claims = get_jwt_claims(req)
     const email = claims['https://example.com/email']
@@ -468,6 +509,267 @@ app.get('/api/employees', checkJwt, function(req, res){
     })
   }
   fetchRow1()
+});
+
+app.get('/admin/orders', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+          const fetchUsers = async() =>{
+            await client.query(easyQB.getAdmin(uid), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1);
+                const aid = result1.rows[0].adminid;
+                const fetchPackages = async() =>{
+                  await client.query(easyQB.getAdminPackages(aid), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                fetchPackages()
+              }
+            })
+          }
+          fetchUsers()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.get('/admin/services', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+          const fetchUsers = async() =>{
+            await client.query(easyQB.getAdmin(uid), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1);
+                const aid = result1.rows[0].adminid;
+                const fetchServices = async() =>{
+                  await client.query(easyQB.getAdminServices(aid), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                fetchServices() 
+              }
+            })
+          }
+          fetchUsers()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.get('/admin/orderHistory', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+          const fetchUsers = async() =>{
+            await client.query(easyQB.getAdmin(uid), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1);
+                const aid = result1.rows[0].adminid;
+                const fetchPackages = async() =>{
+                  await client.query(easyQB.getAdminHistory(aid), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                fetchPackages()
+              }
+            })
+          }
+          fetchUsers()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.get('/admin/drivers', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+          const fetchCompany = async() =>{
+            await client.query(easyQB.getAdminCompany(uid), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1);
+                const cname = result1.rows[0].companyname;
+                const fetchDrivers = async() =>{
+                  await client.query(easyQB.getDrivers(cname), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                fetchDrivers()
+              }
+            })
+          }
+          fetchCompany()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.post('/admin/updateOrders', function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body)
+    await client.query(easyQB.updateOrders(req.body.packageid, req.body.packageassigned), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.rows)
+        res.status(200).json(result.rows)}
+    })
+  }
+  fetchRow()
+});
+
+app.post('/admin/addServices', function(req, res) {
+  const fetchRow1 = async() =>{
+    console.log(req.body)
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+          const fetchUsers = async() =>{
+            await client.query(easyQB.getAdmin(uid), (err, result1) => {
+              if (err){         
+                console.log(err.stack)
+                res.status(400).json(err)
+              } else {
+                console.log(result1);
+                const aid = result1.rows[0].adminid;
+                const addService = async() =>{
+                  await client.query(easyQB.createService(req.body.pspeed, req.body.ptype, req.body.psize, req.body.pweight, req.body.price, aid), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                addService()
+              }
+            })
+          }
+          fetchUsers()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.post('/admin/updateServices', function(req, res) {
+  const fetchRow1 = async() =>{
+    console.log(req.body)
+    await client.query(easyQB.updateServices(req.body.id, req.body.pspeed, req.body.ptype, req.body.psize, req.body.pweight, req.body.price), (err, result2) => {
+      if (err){         
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result2.rows)
+        res.status(200).json(result2.rows)
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.delete('/admin/deleteServices', function(req, res){
+  const fetchRow1 = async() =>{
+    console.log(req.body)
+    await client.query(easyQB.deleteServices(req.body.id), (err, result2) => {
+      if (err){         
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result2.rows)
+        res.status(200).json(result2.rows)
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.post('/api/me', checkJwt, function(req, res){
+  const fetchRow = async() =>{
+    await client.query(easyQB.updateUser(req.body.email, req.body.fname, req.body.lname, req.body.phone, req.body.address.streetAddress, req.body.address.city, req.body.address.state, req.body.address.zip, req.body.address.googlelink), (err, result) => {
+      if(err){
+        res.status(400).json(err.stack)
+      } else {
+        res.status(200).json(result.rows)
+      }
+    })
+  }
+  fetchRow()
 });
 
 app.post('/api/search', function(req, res) {
