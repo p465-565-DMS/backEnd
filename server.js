@@ -121,6 +121,10 @@ class ezQueryBuilder {
       return "SELECT userid FROM Users WHERE email = '"+email+"';"  
     }
 
+    getUsername(email){
+      return "SELECT username FROM Users WHERE email = '"+email+"';"
+    }
+
     getCompany(uid){
       return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
     }
@@ -137,6 +141,10 @@ class ezQueryBuilder {
       return "SELECT u.username FROM users u, deliverydriver d WHERE u.userid = d.userid AND d.companyname = '"+cname+"';";
     }
 
+    getPackage(tid){
+      return "SELECT * FROM package WHERE trackingid = '"+tid+"';";
+    }
+
     getAdminPackages(aid){
       return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.packagedestination, p.deadline, p.packagespeed, p.packagetype, p.packageweight, p.packagesize, p.packagestatus, p.packageassigned, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.adminid = '"+aid+"';";
     }
@@ -149,6 +157,18 @@ class ezQueryBuilder {
       return "SELECT DISTINCT s.id, s.pspeed, s.ptype, s.psize, s.pweight, s.price FROM deliveryadmin a, servicedetails s WHERE s.adminid='"+aid+"';";
     }
 
+    getDriverPackages(uname){
+      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.packagedestination, p.deadline, p.packagespeed, p.packagetype, p.packageweight, p.packagesize, p.packagestatus, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packageassigned = '"+uname+"';";
+    }
+    
+    getDriverHistory(uname){
+      return "SELECT DISTINCT u.email, u.fname, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packageassigned = '"+uname+"';";
+    }
+    
+    getUserHistory(uid){
+      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.userid = '"+uid+"';";
+    }
+
     getEmployee(cname){
       return "SELECT DISTINCT u.fname, u.lname, u.email, u.username, u.role, u.googlelink FROM users u, deliverydriver dd WHERE dd.companyname ='"+cname+"' AND dd.userid = u.userid;"
     }
@@ -159,6 +179,10 @@ class ezQueryBuilder {
 
     updateOrders(packageid, driver){
       return "UPDATE package SET packageassigned = '"+driver+"' WHERE packageid = '"+packageid+"';";
+    }
+
+    updatePackage(packageid, status, location){
+      return "UPDATE package SET packagestatus = '"+status+"' , packagelocation = '"+location+"' WHERE packageid = '"+packageid+"';";
     }
 
     updateUsersAddress(username, address){
@@ -239,145 +263,7 @@ class ezQueryBuilder {
 
 }
 
-//Example here...
 let easyQB = new ezQueryBuilder();
-
-
-
-//THIS CAN ALL BE DELETED IF YOU WANT, ITS JUST TESTING EACH QUERY BEING BUILT TO ENSURE CORRECTNESS
-
-
-////SECTION 1 - Retrieving Stuff
-      // easyQB.getUsersFromCompany();
-      // easyQB.getAllCompanies();
-      // easyQB.getAUsersPackages();
-      // easyQB.getACompanysPackages();
-      // easyQB.getACustomersPackages();
-
-// client.connect()
-// client.query(easyQB.getUsersFromCompany("Presidential Shark Industries"), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.getAllCompanies(), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.getAUsersPackages("lewi"), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.getACompanysPackages("Presidential Shark Industries"), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.getACustomersPackages("llapelle"), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-
-////SECTION 2 - Updating Stuff
-  // updateUsersAddress('llapelle', 'Bakersfield, TX')
-  // updatePackageStartingLocation('1', 'Lukenbach Texas');
-  // updatePackageEndingLocation('1', 'Jackson, TN');
-  // updatePackageDeliveryStatus('1', 'IN TRANSIT');
-
-// client.connect()
-// client.query(easyQB.updateUsersAddress('llapelle', 'Bakersfield, TX'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.updatePackageStartingLocation('1', 'Lukenbach Texas'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.updatePackageEndingLocation('1', 'Jackson TN'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.updatePackageDeliveryStatus('1', 'IN TRANSIT'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-
-
-
-////SECTION 3 - Inserting Stuff
-
-
-
-// client.connect()
-// client.query(easyQB.createACompany('Thingers', '1', 'logo.png', 'lorem ipsum etc', 'Deep River, MS'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.createAUser('Test', 'test', 't', 'lorem ipsum etc', 1,'address'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.createUserRelationToCompany(4,12), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-// client.connect()
-// client.query(easyQB.createAPackage('testa', 'oof', 'wpw', '1/1/2020', 'alabama', 'in transit'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-
-// client.connect()
-// client.query(easyQB.createAPackageRelation('1','1'), (err, res) => {
-//   console.log(res)
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-////SECTION 4 - Deleting Stuff
-//Not done yet, because we aren't using it for the demo. Writing the rest of the queries took a deceptively long time.
-
-// // client.connect()
-// client.query(easyQB.getCompany('61'), (err, result) => {
-//   console.log(result.rows[0].companyname)})
-//   //Do whatever you want to with the data here...
-//   client.end()
-// })
-
-
 
 app.post('/fill-info', checkJwt, function(req, res) {
   if(req.body.role  == "user") {
@@ -448,6 +334,21 @@ app.get('/api/me', checkJwt, function(req, res){
     const claims = get_jwt_claims(req)
     const email = claims['https://example.com/email']
     await client.query(easyQB.getUser(email), (err, result) => {
+      if(result.rows.length > 0){
+        res.status(200).json(result.rows)
+      } else {
+        res.status(400).json()
+      }
+    })
+  }
+  fetchRow()
+});
+
+app.post("/api/trackPackage", function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body.trackingid)
+    await client.query(easyQB.getPackage(req.body.trackingid), (err, result) => {
+      console.log(result.rows)
       if(result.rows.length > 0){
         res.status(200).json(result.rows)
       } else {
@@ -551,6 +452,34 @@ app.get('/admin/orders', checkJwt, function(req, res){
   fetchRow1()
 });
 
+app.get('/driver/orders', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUsername(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uname = result.rows[0].username;
+        console.log(result.rows[0].username);
+                const fetchPackages = async() =>{
+                  await client.query(easyQB.getDriverPackages(uname), (err, result2) => {
+                    if (err){         
+                      console.log(err.stack)
+                      res.status(400).json(err)
+                    } else {
+                      console.log(result2.rows)
+                      res.status(200).json(result2.rows)}
+                  })
+                }
+                fetchPackages()
+              }
+            })
+          }
+  fetchRow1()
+});
+
 app.get('/admin/services', checkJwt, function(req, res){
   const fetchRow1 = async() =>{
     const claims = get_jwt_claims(req)
@@ -631,6 +560,62 @@ app.get('/admin/orderHistory', checkJwt, function(req, res){
   fetchRow1()
 });
 
+app.get('/driver/orderHistory', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUsername(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uname = result.rows[0].username;
+        console.log(result.rows[0].username);
+        const fetchPackages = async() =>{
+          await client.query(easyQB.getDriverHistory(uname), (err, result2) => {
+            if (err){         
+              console.log(err.stack)
+              res.status(400).json(err)
+            } else {
+              console.log(result2.rows)
+              res.status(200).json(result2.rows)}
+          })
+        }
+        fetchPackages()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.get('/user/orderHistory', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+        const fetchPackages = async() =>{
+          await client.query(easyQB.getUserHistory(uid), (err, result2) => {
+            if (err){         
+              console.log(err.stack)
+              res.status(400).json(err)
+            } else {
+              console.log(result2.rows)
+              res.status(200).json(result2.rows)}
+          })
+        }
+        fetchPackages()
+      }
+    })
+  }
+  fetchRow1()
+});
+
 app.get('/admin/drivers', checkJwt, function(req, res){
   const fetchRow1 = async() =>{
     const claims = get_jwt_claims(req)
@@ -675,6 +660,21 @@ app.post('/admin/updateOrders', function(req, res) {
   const fetchRow = async() =>{
     console.log(req.body)
     await client.query(easyQB.updateOrders(req.body.packageid, req.body.packageassigned), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.rows)
+        res.status(200).json(result.rows)}
+    })
+  }
+  fetchRow()
+});
+
+app.post('/driver/updateOrders', function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body)
+    await client.query(easyQB.updatePackage(req.body.packageid, req.body.packagestatus, req.body.packagelocation), (err, result) => {
       if (err){
         console.log(err.stack)
         res.status(400).json(err)
