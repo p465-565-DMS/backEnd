@@ -141,6 +141,10 @@ class ezQueryBuilder {
       return "SELECT u.username FROM users u, deliverydriver d WHERE u.userid = d.userid AND d.companyname = '"+cname+"';";
     }
 
+    getPackage(tid){
+      return "SELECT * FROM package WHERE trackingid = '"+tid+"';";
+    }
+
     getAdminPackages(aid){
       return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.packagedestination, p.deadline, p.packagespeed, p.packagetype, p.packageweight, p.packagesize, p.packagestatus, p.packageassigned, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.adminid = '"+aid+"';";
     }
@@ -159,6 +163,10 @@ class ezQueryBuilder {
     
     getDriverHistory(uname){
       return "SELECT DISTINCT u.email, u.fname, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packageassigned = '"+uname+"';";
+    }
+    
+    getUserHistory(uid){
+      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.userid = '"+uid+"';";
     }
 
     getEmployee(cname){
@@ -326,6 +334,21 @@ app.get('/api/me', checkJwt, function(req, res){
     const claims = get_jwt_claims(req)
     const email = claims['https://example.com/email']
     await client.query(easyQB.getUser(email), (err, result) => {
+      if(result.rows.length > 0){
+        res.status(200).json(result.rows)
+      } else {
+        res.status(400).json()
+      }
+    })
+  }
+  fetchRow()
+});
+
+app.post("/api/trackPackage", function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body.trackingid)
+    await client.query(easyQB.getPackage(req.body.trackingid), (err, result) => {
+      console.log(result.rows)
       if(result.rows.length > 0){
         res.status(200).json(result.rows)
       } else {
@@ -550,6 +573,34 @@ app.get('/driver/orderHistory', checkJwt, function(req, res){
         console.log(result.rows[0].username);
         const fetchPackages = async() =>{
           await client.query(easyQB.getDriverHistory(uname), (err, result2) => {
+            if (err){         
+              console.log(err.stack)
+              res.status(400).json(err)
+            } else {
+              console.log(result2.rows)
+              res.status(200).json(result2.rows)}
+          })
+        }
+        fetchPackages()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.get('/user/orderHistory', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+        const fetchPackages = async() =>{
+          await client.query(easyQB.getUserHistory(uid), (err, result2) => {
             if (err){         
               console.log(err.stack)
               res.status(400).json(err)
