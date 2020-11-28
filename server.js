@@ -75,7 +75,7 @@ client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'hermes',
-    password: 'adidas123',
+    password: 'postgres',
     port: 5432,
 });
 // const client = new Client({
@@ -193,9 +193,9 @@ class ezQueryBuilder {
       return "INSERT INTO Company (compName, creatorId, logo, description, address) VALUES ('" + compName + "', " + creatorId + ", '" + logo + "', '" + description +"', '" + address + "');";
     }
 
-    createAUser(fname, lname, username, role, address, phone, email, state, city, link, zipcode){
-      console.log("INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, googlelink, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+link+"', '"+zipcode +"');");
-      return "INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, googlelink, zipcode) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+link+"', '"+zipcode +"');";
+    createAUser(fname, lname, username, role, address, phone, email, state, city, link, zipcode, lat, lng){
+      console.log("INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, googlelink, zipcode, lat, lng) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+link+"', '"+zipcode +"', '"+lat+"', '"+lng+"');");
+      return "INSERT INTO Users (fname, lName, userName, role, address, phone, email, state, city, googlelink, zipcode, lat, lng) VALUES ('"+fname+"', '"+lname+"', '"+username+"', '"+role+"', '"+address+"', '"+phone+"', '"+email+"', '"+state+"', '"+city+"', '"+link+"', '"+zipcode +"', '"+lat+"', '"+lng+"');";
     }
 
     createAnAdmin(username, cname, spkg, mpkg, lpkg, elec, deli, heavy, doc, other, express, normal){
@@ -382,7 +382,7 @@ let easyQB = new ezQueryBuilder();
 app.post('/fill-info', checkJwt, function(req, res) {
   if(req.body.role  == "user") {
   const setRow = async() =>{
-    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
+    await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode, req.body.address.lat, req.body.address.lng), (err, result) => {
       if (err){         
         console.log(err.stack)
         res.status(400).json(err)
@@ -395,7 +395,7 @@ app.post('/fill-info', checkJwt, function(req, res) {
   }
   else if(req.body.role == "dadmin"){
     const setRow = async() => {
-      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
+      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode, req.body.address.lat, req.body.address.lng), (err, result) => {
         if (err){         
           console.log(err.stack)
           res.status(400).json(err)
@@ -419,7 +419,7 @@ app.post('/fill-info', checkJwt, function(req, res) {
   }
   else {
     const setRow = async() => {
-      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode), (err, result) => {
+      await client.query(easyQB.createAUser(req.body.fname, req.body.lname, req.body.username, req.body.role, req.body.address.streetAddress, req.body.phone, req.body.email, req.body.address.state, req.body.address.city, req.body.address.googleMapLink, req.body.zipCode, req.body.address.lat, req.body.address.lng), (err, result) => {
         if (err){         
           console.log(err.stack)
           res.status(400).json(err)

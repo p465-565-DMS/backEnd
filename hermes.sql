@@ -297,7 +297,9 @@ CREATE TABLE public.users (
     state text,
     city text,
     zipcode character varying,
-    googlelink character varying
+    googlelink character varying,
+    lat decimal,
+    lng decimal
 );
 
 
