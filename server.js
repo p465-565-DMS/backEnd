@@ -136,6 +136,10 @@ class ezQueryBuilder {
     getAdminCompany(uid){
       return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
     }
+
+    getAdminCompanyAddress(){
+      return "SELECT da.companyname, u.lat, u.lng FROM Users u, deliveryadmin da WHERE role = 'dadmin' and u.userid = da.userid;"
+    }
     
     getDrivers(cname){
       return "SELECT u.username FROM users u, deliverydriver d WHERE u.userid = d.userid AND d.companyname = '"+cname+"';";
@@ -366,6 +370,19 @@ app.post('/api/me', checkJwt, function(req, res){
         res.status(400).json(err.stack)
       } else {
         res.status(200).json(result.rows)
+      }
+    })
+  }
+  fetchRow()
+});
+
+app.get('/api/address', checkJwt, function(req, res){
+  const fetchRow = async() =>{
+    await client.query(easyQB.getAdminCompanyAddress(), (err, result) => {
+      if(result.rows.length > 0){
+        res.status(200).json(result.rows)
+      } else {
+        res.status(400).json()
       }
     })
   }
