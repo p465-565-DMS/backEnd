@@ -71,19 +71,19 @@ app.use(function(err, req, res, next){
 //   port: 5432,
 // })
 
-// client = new Client({
-//     user: 'postgres',
-//     host: 'localhost',
-//     database: 'hermes',
-//     password: 'postgres',
-//     port: 5432,
-// });
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'hermes',
+    password: 'postgres',
+    port: 5432,
 });
+// const client = new Client({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: {
+//     rejectUnauthorized: false
+//   }
+// });
 client.connect()
 
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
@@ -138,7 +138,7 @@ class ezQueryBuilder {
     }
 
     getAdminCompanyAddress(){
-      return "SELECT da.companyname, u.lat, u.lng FROM Users u, deliveryadmin da WHERE role = 'dadmin' and u.userid = da.userid;"
+      return "SELECT da.companyname, u.googlelink, u.lat, u.lng FROM Users u, deliveryadmin da WHERE role = 'dadmin' and u.userid = da.userid;"
     }
     
     getDrivers(cname){
@@ -163,6 +163,10 @@ class ezQueryBuilder {
 
     getDriverPackages(uname){
       return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.packagedestination, p.deadline, p.packagespeed, p.packagetype, p.packageweight, p.packagesize, p.packagestatus, p.packagelocation, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packageassigned = '"+uname+"';";
+    }
+
+    getDriverPackagesByEmail(email){
+      return "SELECT DISTINCT p.packagelocation FROM Package p, Users u WHERE p.packageassigned = u.username and u.email = '" + email + "';";
     }
     
     getDriverHistory(uname){
@@ -379,6 +383,23 @@ app.post('/api/me', checkJwt, function(req, res){
 app.get('/api/address', checkJwt, function(req, res){
   const fetchRow = async() =>{
     await client.query(easyQB.getAdminCompanyAddress(), (err, result) => {
+      if(result.rows.length > 0){
+        res.status(200).json(result.rows)
+      } else {
+        res.status(400).json()
+      }
+    })
+  }
+  fetchRow()
+});
+
+app.get('/api/destination', checkJwt, function(req, res){
+  const fetchRow = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getDriverPackagesByEmail(email), (err, result) => {
+      console.log(result)
+      console.log(email)
       if(result.rows.length > 0){
         res.status(200).json(result.rows)
       } else {
