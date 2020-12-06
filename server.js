@@ -400,7 +400,7 @@ app.post('/api/me', checkJwt, function(req, res){
 app.get('/api/address', function(req, res){
   const fetchRow = async() =>{
     await client.query(easyQB.getAdminCompanyAddress(), (err, result) => {
-      console.log(result.rows)
+      console.log(result)
       if(result.rows.length > 0){
         res.status(200).json(result.rows)
       } else {
