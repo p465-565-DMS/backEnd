@@ -71,19 +71,19 @@ app.use(function(err, req, res, next){
 //   port: 5432,
 // })
 
-// client = new Client({
-//     user: 'postgres',
-//     host: 'localhost',
-//     database: 'hermes',
-//     password: 'postgres',
-//     port: 5432,
-// });
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'hermes',
+    password: 'adidas123',
+    port: 5432,
 });
+// const client = new Client({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: {
+//     rejectUnauthorized: false
+//   }
+// });
 client.connect()
 
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
@@ -135,6 +135,10 @@ class ezQueryBuilder {
     
     getAdminCompany(uid){
       return "SELECT companyname FROM deliveryadmin WHERE userid = '"+uid+"';"
+    }
+
+    getAdminInfo(uid){
+      return "SELECT da.companyname, u.address, u.phone, u.state, u.city, u.email FROM users u, deliveryadmin da WHERE u.userid = '"+uid+"' AND da.userid = '"+uid+"';"
     }
     
     getDrivers(cname){
@@ -205,6 +209,10 @@ class ezQueryBuilder {
       return "UPDATE Package SET packageDeliveryStatus = '" + packageDeliveryStatus + "' WHERE packageId = " + packageId + ";"
     }
 
+    updateReview(packageid, review){
+      return "UPDATE package SET review = '"+review+"' WHERE packageid='"+packageid+"';"
+    }
+    
     updateServices(id, speed, type, size, weight, price){
       return "UPDATE servicedetails SET pspeed = '"+speed+"', "+"ptype = '"+type+"', "+"psize = '"+size+"', "+"pweight = '"+weight+"', "+"price = '"+price+"' WHERE id = '"+id+"';";
     }
@@ -235,6 +243,10 @@ class ezQueryBuilder {
 
     createAPackage(title, desc, sloc, deadline, eloc, status){
       return "INSERT INTO Package (packageTitle, packageDescription, packageSLocation, deadline, packageELocation, packageDeliveryStatus) VALUES ('"+title+"','"+desc+"','"+sloc+"','"+deadline+"','"+eloc+"', '"+status+"');";
+    }
+
+    placeOrder(adminid, userid, price, trackingid, packagesource, packagedestination, packagelocation, packagespeed, packagetype, packagesize, packageweight, deadline, long, lat){
+      return "INSERT INTO package (adminid, userid, price, trackingid, packagesource, packagedestination, packagelocation, packagespeed, packagetype, packagesize, packageweight, deadline, long, lat) VALUES ('"+adminid+"','"+userid+"','"+price+"','"+trackingid+"','"+packagesource+"','"+packagedestination+"','"+packagelocation+"','"+packagespeed+"','"+packagetype+"','"+packagesize+"','"+packageweight+"','"+deadline+"','"+long+"','"+lat+"');"
     }
 
     createAPackageRelation(userid, packageid){
@@ -343,6 +355,7 @@ app.get('/api/me', checkJwt, function(req, res){
   }
   fetchRow()
 });
+
 
 app.post("/api/trackPackage", function(req, res) {
   const fetchRow = async() =>{
@@ -616,6 +629,33 @@ app.get('/user/orderHistory', checkJwt, function(req, res){
   fetchRow1()
 });
 
+app.get('/admin/company', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        const fetchCompany = async() =>{
+          await client.query(easyQB.getAdminInfo(uid), (err, result2) => {
+            if (err){         
+              console.log(err.stack)
+              res.status(400).json(err)
+            } else {
+              console.log(result2.rows)
+              res.status(200).json(result2.rows)}
+          })
+        }
+        fetchCompany()
+      }
+    })
+  }
+  fetchRow1()
+});
+
 app.get('/admin/drivers', checkJwt, function(req, res){
   const fetchRow1 = async() =>{
     const claims = get_jwt_claims(req)
@@ -671,10 +711,40 @@ app.post('/admin/updateOrders', function(req, res) {
   fetchRow()
 });
 
+app.post('/user/review', function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body)
+    await client.query(easyQB.updateReview(req.body.packageid, req.body.review), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.rows)
+        res.status(200).json(result.rows)}
+    })
+  }
+  fetchRow()
+});
+
 app.post('/driver/updateOrders', function(req, res) {
   const fetchRow = async() =>{
     console.log(req.body)
     await client.query(easyQB.updatePackage(req.body.packageid, req.body.packagestatus, req.body.packagelocation), (err, result) => {
+      if (err){
+        console.log(err.stack)
+        res.status(400).json(err)
+      } else {
+        console.log(result.rows)
+        res.status(200).json(result.rows)}
+    })
+  }
+  fetchRow()
+});
+
+app.post('/api/placeOrder', function(req, res) {
+  const fetchRow = async() =>{
+    console.log(req.body)
+    await client.query(easyQB.placeOrder(req.body.adminid, req.body.userid, req.body.price, req.body.trackingid, req.body.packagesource, req.body.packagedestination, req.body.packagelocation, req.body.packagespeed, req.body.packagetype, req.body.packagesize, req.body.packageweight, req.body.deadline, req.body.long, req.body.lat), (err, result) => {
       if (err){
         console.log(err.stack)
         res.status(400).json(err)
