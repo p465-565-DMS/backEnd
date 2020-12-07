@@ -204,7 +204,9 @@ CREATE TABLE public.package (
     adminid integer,
     review character varying,
     price double precision,
-    trackingid character varying
+    trackingid character varying,
+    lat decimal,
+    long decimal
 );
 
 
@@ -299,7 +301,7 @@ CREATE TABLE public.users (
     zipcode character varying,
     googlelink character varying,
     lat decimal,
-    lng decimal
+    long decimal
 );
 
 

@@ -258,7 +258,7 @@ class ezQueryBuilder {
     }
 
     placeOrder(adminid, userid, price, trackingid, packagesource, packagedestination, packagelocation, packagespeed, packagetype, packagesize, packageweight, deadline, long, lat){
-      return "INSERT INTO package (adminid, userid, price, trackingid, packagesource, packagedestination, packagelocation, packagespeed, packagetype, packagesize, packageweight, deadline, long, lat) VALUES ('"+adminid+"','"+userid+"','"+price+"','"+trackingid+"','"+packagesource+"','"+packagedestination+"','"+packagelocation+"','"+packagespeed+"','"+packagetype+"','"+packagesize+"','"+packageweight+"','"+deadline+"','"+long+"','"+lat+"');"
+      return "INSERT INTO package (packagestatus, adminid, userid, price, trackingid, packagesource, packagedestination, packagelocation, packagespeed, packagetype, packagesize, packageweight, deadline, long, lat) VALUES ('Recieved', '"+adminid+"','"+userid+"','"+price+"','"+trackingid+"','"+packagesource+"','"+packagedestination+"','"+packagelocation+"','"+packagespeed+"','"+packagetype+"','"+packagesize+"','"+packageweight+"','"+deadline+"','"+long+"','"+lat+"');"
     }
 
     createAPackageRelation(userid, packageid){
