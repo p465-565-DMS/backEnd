@@ -75,7 +75,7 @@ client = new Client({
     user: 'postgres',
     host: 'localhost',
     database: 'hermes',
-    password: 'postgres',
+    password: 'adidas123',
     port: 5432,
 });
 // const client = new Client({
@@ -138,7 +138,11 @@ class ezQueryBuilder {
     }
 
     getAdminCompanyAddress(){
-      return "SELECT da.companyname, u.googlelink, u.lat, u.lng FROM Users u, deliveryadmin da WHERE role = 'dadmin' and u.userid = da.userid;"
+      return "SELECT da.companyname, u.googlelink, u.lat, u.long FROM Users u, deliveryadmin da WHERE role = 'dadmin' and u.userid = da.userid;"
+    }
+
+    getAdminInfo(uid){
+      return "SELECT da.companyname, u.address, u.city, u.state, u.email, u.phone FROM deliveryadmin da, users u WHERE u.userid = '"+uid+"' AND da.userid='"+uid+"';"
     }
     
     getDrivers(cname){
@@ -174,7 +178,11 @@ class ezQueryBuilder {
     }
     
     getUserHistory(uid){
-      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.userid = '"+uid+"';";
+      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packagestatus = 'delivered' AND p.userid = '"+uid+"';";
+    }
+
+    getUserOrders(uid){
+      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packagestatus != 'delivered' AND p.userid = '"+uid+"';";
     }
 
     getEmployee(cname){
@@ -649,6 +657,34 @@ app.get('/user/orderHistory', checkJwt, function(req, res){
         console.log(result.rows[0].userid);
         const fetchPackages = async() =>{
           await client.query(easyQB.getUserHistory(uid), (err, result2) => {
+            if (err){         
+              console.log(err.stack)
+              res.status(400).json(err)
+            } else {
+              console.log(result2.rows)
+              res.status(200).json(result2.rows)}
+          })
+        }
+        fetchPackages()
+      }
+    })
+  }
+  fetchRow1()
+});
+
+app.get('/user/currentOrders', checkJwt, function(req, res){
+  const fetchRow1 = async() =>{
+    const claims = get_jwt_claims(req)
+    const email = claims['https://example.com/email']
+    await client.query(easyQB.getUserId(email), (err, result) => {
+      console.log(result)
+      if(err){
+        res.status(400).json()
+      } else {
+        const uid = result.rows[0].userid;
+        console.log(result.rows[0].userid);
+        const fetchPackages = async() =>{
+          await client.query(easyQB.getUserOrders(uid), (err, result2) => {
             if (err){         
               console.log(err.stack)
               res.status(400).json(err)
