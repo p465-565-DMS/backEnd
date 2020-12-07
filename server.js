@@ -166,7 +166,7 @@ class ezQueryBuilder {
     }
 
     getDriverPackagesByEmail(email){
-      return "SELECT DISTINCT p.packagelocation FROM Package p, Users u WHERE p.packageassigned = u.username and u.email = '" + email + "';";
+      return "SELECT p.packagelocation FROM Package p, Users u WHERE p.packageassigned = u.username and u.email = '" + email + "';";
     }
     
     getDriverHistory(uname){
