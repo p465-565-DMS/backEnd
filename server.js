@@ -178,7 +178,7 @@ class ezQueryBuilder {
     }
     
     getUserHistory(uid){
-      return "SELECT DISTINCT u.email, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM package p, users u WHERE u.userid = p.userid AND p.packagestatus = 'Delivered' AND p.userid = '"+uid+"';";
+      return "SELECT DISTINCT u.email, da.companyname, p.packageid, p.packagesource, p.price, p.review, p.deadline, p.packagedestination, p.packagetype, p.packagestatus, p.packagelocation, p.packageassigned, p.trackingid FROM deliveryadmin da, package p, users u WHERE u.userid = p.userid AND da.adminid = p.adminid AND p.packagestatus = 'Delivered' AND p.userid = '"+uid+"';";
     }
 
     getUserOrders(uid){

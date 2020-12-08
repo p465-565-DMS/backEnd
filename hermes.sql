@@ -107,7 +107,7 @@ ALTER TABLE public.customertopackage OWNER TO postgres;
 
 --
 -- Name: deliveryadmin; Type: TABLE; Schema: public; Owner: postgres
---
+--  
 
 CREATE TABLE public.deliveryadmin (
     adminid integer NOT NULL,
@@ -497,9 +497,11 @@ SELECT pg_catalog.setval('public.deliverydriver_driverid_seq', 9, true);
 -- Data for Name: package; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.package (packageid, deadline, packagelocation, packagestatus, packageassigned, packagespeed, packagetype, packagesize, packageweight, packagesource, packagedestination, userid, adminid, review, price, trackingid) FROM stdin;
-8	24/11/2020	https://www.google.com/maps?q=Boston,+MA,+USA&rlz=1C1CHBF_enUS862US862&um=1&ie=UTF-8&sa=X&ved=2ahUKEwiirsPK_ZvtAhWxguYKHXPfA_AQ_AUoAXoECDYQAw	Recieved	daxelaf572	Express	Documents	Small	Light	Boston	Chicago	78	7	Good and user friendly interface	78.920000000000002	2c868b6b-8502-4a18-abf4-edc576f85790
-7	24/11/2020	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741	Recieved	limitax114	Regular	Electonics	Large	Heavy	Boston	Chicago	78	7	N/A	75.120000000000005	0aac3eac-6345-45b3-9384-28d349d886c9
+COPY public.package (packageid, deadline, packagelocation, packagestatus, packageassigned, packagespeed, packagetype, packagesize, packageweight, packagesource, packagedestination, userid, adminid, review, price, trackingid, lat, long) FROM stdin;
+13	12/17/2020	https://maps.google.com/?q=4511+3rd+Ave.,+The+Bronx,+NY+10457,+USA&ftid=0x89c2f47db1da1731:0xd35b3a18ce33b746	Delivered	limitax114	Regular	Regular	Small	Light	521 North Washington Street	747 Manhattan Beach Boulevard	78	7	5 stars	10	6c3187a6eb4c288c97c001e9e37de19c	-118.4042906	33.8871918
+14	12/17/2020	https://maps.google.com/?q=4511+3rd+Ave.,+The+Bronx,+NY+10457,+USA&ftid=0x89c2f47db1da1731:0xd35b3a18ce33b746	Delivered	limitax114	Regular	Regular	Small	Light	521 North Washington Street	7211 Interstate 35	78	7	ok	10	fe7f8255ec93559f68e1f4bba7642112	-97.7018542	30.3325467
+12	12/03/2020	https://maps.google.com/?q=5441+N+East+River+Rd,+Chicago,+IL+60656,+USA&ftid=0x880fca1d7a5b8631:0x7bd1524bc944b4f	Recieved	limitax114	Regular	Electronic	Small	Light	721 S College Mall Rd	5441 North East River Road	78	8	Not satisfying service, received package after estimated time.	75	a12b2cb38bad9b45b5caf08d6773e7e4	-87.8432723	41.9782801
+15	12/03/2020	https://maps.google.com/?q=4540+Center+Blvd,+Queens,+NY+11109,+USA&ftid=0x89c25921a251e7c7:0xae4955bac345fdbc	Recieved	\N	Regular	Electronic	Small	Light	721 S College Mall Rd	4540 Center Boulevard	78	8	\N	75	2f67217c5c12004ce3ae002a26af0d1b	-73.9569018	40.7478908
 \.
 
 
@@ -572,10 +574,42 @@ COPY public.servicedetails (id, adminid, pspeed, ptype, psize, pweight, price) F
 3	8	Regular	Electronic	Small	Light	75.00
 4	9	Regular	Electronic	Small	Light	95.00
 5	10	Regular	Electronic	Small	Light	77.00
-8	7	Regular	Regular	Medium	Medium	35.00
-11	7	Regular	Electronics	Medium	Medium	40.00
-7	7	Regular	Electronics	Small	Light	95.00
-12	7	Regular	Electronics	Small	Light	85.00
+14	7	Regular	Regular	Small	Light	10.00
+15	7	Regular	Regular	Medium	Light	15.00
+16	7	Regular	Regular	Large	Light	20.00
+17	7	Express	Regular	Small	Light	15.00
+18	7	Express	Regular	Medium	Light	20.00
+19	7	Express	Regular	Large	Light	25.00
+20	7	Regular	Regular	Medium	Medium	25.00
+21	7	Regular	Regular	Large	Heavy	50.00
+22	7	Express	Regular	Medium	Medium	50.00
+23	7	Express	Regular	Large	Heavy	75.00
+24	7	Regular	Electronics	Small	Light	30.00
+25	7	Regular	Electronics	Medium	Medium	40.00
+26	7	Regular	Electronics	Large	Heavy	60.00
+27	7	Express	Electronics	Small	Light	35.00
+28	7	Express	Electronics	Medium	Medium	45.00
+29	7	Express	Electronics	Large	Heavy	75.00
+30	7	Regular	Food	Small	Light	15.00
+31	7	Regular	Food	Medium	Medium	25.00
+32	7	Express	Food	Small	Light	35.00
+33	7	Express	Food	Medium	Medium	45.00
+34	7	Regular	Documents	Small	Light	5.00
+35	7	Regular	Documents	Medium	Light	7.00
+36	7	Regular	Documents	Medium	Medium	12.00
+37	7	Regular	Documents	Large	Heavy	20.00
+38	7	Express	Documents	Small	Light	10.00
+39	7	Express	Documents	Medium	Medium	15.00
+40	7	Regular	Others	Small	Light	15.00
+41	7	Regular	Others	Medium	Medium	25.00
+42	7	Regular	Others	Large	Heavy	35.00
+43	7	Regular	Others	Large	Medium	25.00
+44	7	Regular	Others	Small	Medium	25.00
+45	7	Express	Others	Small	Light	25.00
+46	7	Express	Others	Medium	Medium	35.00
+47	7	Express	Others	Large	Medium	45.00
+48	7	Express	Others	Large	Heavy	55.00
+49	7	Express	Others	Small	Medium	30.00
 \.
 
 
@@ -583,26 +617,27 @@ COPY public.servicedetails (id, adminid, pspeed, ptype, psize, pweight, price) F
 -- Name: servicedetails_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.servicedetails_id_seq', 12, true);
+SELECT pg_catalog.setval('public.servicedetails_id_seq', 49, true);
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (userid, fname, lname, username, role, address, phone, email, state, city, zipcode, googlelink) FROM stdin;
-69	daxe	laf	daxelaf572	driver	2307 East 2nd Street	741258963	daxelaf572@mojzur.com	Indiana	Bloomington	47454	https://maps.google.com/?q=2307+E+2nd+St,+Bloomington,+IN+47401,+USA&ftid=0x886c66993c6b0b17:0xdab438e92530cd5a
-70	xo	logic	xologic282	driver	4569 South Rockport Road	456789123	xologic282@mojzur.com	Indiana	Bloomington	74748	https://maps.google.com/?q=4569+S+Rockport+Rd,+Bloomington,+IN+47403,+USA&ftid=0x886c67fab212aa33:0xac5e3a58068eaa31
-61	Viral	Praj	vkprajap	dadmin	521 North Washington Street	14578623	vkprajap@iu.edu	Indiana	Bloomington	54878	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741
-62	Luke	Martin	lmartin	dadmin	721 S College Mall Rd	582146397	lmartin@gmail.com	IN	Bloomington	47401	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741
-63	John	Oliver	joliver	dadmin	721 S College Mall Rd	582146397	jol@gmail.com	IN	Bloomington	47401	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741
-64	Neville	Potter	npoter	dadmin	721 S College Mall Rd	582146397	npoter@gmail.com	IN	Bloomington	47401	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741
-71	recim	john	recimo4040	dadmin	455 North College Avenue	8126508528	recimo4040@x1post.com	Indiana	Bloomington	789748	https://maps.google.com/?q=455+N+College+Ave,+Bloomington,+IN+47404,+USA&ftid=0x886c66dc02df13d5:0xbe6d4b1f843e60c
-65	Viral	Prajapati	viralprajapati07	dadmin	789 East Sherwood Hills Drive	8126508528	viralprajapati07@gmail.com	Indiana	Bloomington	78975	https://maps.google.com/?q=789+E+Sherwood+Hills+Dr,+Bloomington,+IN+47401,+USA&ftid=0x886c6643552c306b:0xabcb5aeecb78c622
-66	fijo	tal	fijota1940	dadmin	541 North Woodlawn Avenue	123456789	fijota1940@ezeca.com	Indiana	Bloomington	47401	https://maps.google.com/?q=541+N+Woodlawn+Ave,+Bloomington,+IN+47406,+USA&ftid=0x886c66c6c7b4edd5:0x10bedf59e9c9d74d
-67	limi	tax	limitax114	driver	694 South Landmark Avenue	78946133	limitax114@adeata.com	Indiana	Bloomington	52526	https://maps.google.com/?q=694+S+Landmark+Ave,+Bloomington,+IN+47403,+USA&ftid=0x886c6711138040d1:0x3766bedc9edf6521
-68	sigeh	llubed	sigeh58579	driver	1425 North Dunn Street	963258741	sigeh58579@llubed.com	Indiana	Bloomington	968574	https://maps.google.com/?q=1425+N+Dunn+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66ce696aca37:0x8cf32b9df0547ad2
-78	James	Austin	xileko1321	user	4500 68th Street Southeast	147852369	xileko1321@tjuln.com	Michigan	Caledonia	565422	https://maps.google.com/?q=4500+68th+St+SE,+Caledonia,+MI+49316,+USA&ftid=0x88184b99848d5027:0x97f542f15ebd506a
+COPY public.users (userid, fname, lname, username, role, address, phone, email, state, city, zipcode, googlelink, lat, long) FROM stdin;
+69	daxe	laf	daxelaf572	driver	2307 East 2nd Street	741258963	daxelaf572@mojzur.com	Indiana	Bloomington	47454	https://maps.google.com/?q=2307+E+2nd+St,+Bloomington,+IN+47401,+USA&ftid=0x886c66993c6b0b17:0xdab438e92530cd5a	39.161536	-86.505240
+70	xo	logic	xologic282	driver	4569 South Rockport Road	456789123	xologic282@mojzur.com	Indiana	Bloomington	74748	https://maps.google.com/?q=4569+S+Rockport+Rd,+Bloomington,+IN+47403,+USA&ftid=0x886c67fab212aa33:0xac5e3a58068eaa31	39.114050	-86.570598
+61	Viral	Praj	vkprajap	dadmin	521 North Washington Street	14578623	vkprajap@iu.edu	Indiana	Bloomington	54878	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741	39.171324	-86.532675
+62	Luke	Martin	lmartin	dadmin	721 S College Mall Rd	582146397	lmartin@gmail.com	IN	Bloomington	47401	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741	39.171341	-86.532611
+63	John	Oliver	joliver	dadmin	721 S College Mall Rd	582146397	jol@gmail.com	IN	Bloomington	47401	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741	39.171341	-86.532611
+64	Neville	Potter	npoter	dadmin	721 S College Mall Rd	582146397	npoter@gmail.com	IN	Bloomington	47401	https://maps.google.com/?q=521+N+Washington+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66db8324466d:0x3b8991617ea53741	39.171341	-86.532611
+71	recim	john	recimo4040	dadmin	455 North College Avenue	8126508528	recimo4040@x1post.com	Indiana	Bloomington	789748	https://maps.google.com/?q=455+N+College+Ave,+Bloomington,+IN+47404,+USA&ftid=0x886c66dc02df13d5:0xbe6d4b1f843e60c	39.170151	-86.535223
+65	Viral	Prajapati	viralprajapati07	dadmin	789 East Sherwood Hills Drive	8126508528	viralprajapati07@gmail.com	Indiana	Bloomington	78975	https://maps.google.com/?q=789+E+Sherwood+Hills+Dr,+Bloomington,+IN+47401,+USA&ftid=0x886c6643552c306b:0xabcb5aeecb78c622	39.133983	-86.524782
+66	fijo	tal	fijota1940	dadmin	541 North Woodlawn Avenue	123456789	fijota1940@ezeca.com	Indiana	Bloomington	47401	https://maps.google.com/?q=541+N+Woodlawn+Ave,+Bloomington,+IN+47406,+USA&ftid=0x886c66c6c7b4edd5:0x10bedf59e9c9d74d	39.170927	-86.523723
+67	limi	tax	limitax114	driver	694 South Landmark Avenue	78946133	limitax114@adeata.com	Indiana	Bloomington	52526	https://maps.google.com/?q=694+S+Landmark+Ave,+Bloomington,+IN+47403,+USA&ftid=0x886c6711138040d1:0x3766bedc9edf6521	39.170902	-86.524008
+68	sigeh	llubed	sigeh58579	driver	1425 North Dunn Street	963258741	sigeh58579@llubed.com	Indiana	Bloomington	968574	https://maps.google.com/?q=1425+N+Dunn+St,+Bloomington,+IN+47408,+USA&ftid=0x886c66ce696aca37:0x8cf32b9df0547ad2	39.180093	-86.529273
+78	James	Austin	xileko1321	user	4500 68th Street Southeast	147852369	xileko1321@tjuln.com	Michigan	Caledonia	565422	https://maps.google.com/?q=4500+68th+St+SE,+Caledonia,+MI+49316,+USA&ftid=0x88184b99848d5027:0x97f542f15ebd506a	42.841014	-85.553134
+87	Ive	Giy	giyive8495	driver	East University Street Bloomington	8123631235	giyive8495@dkt1.com	United States	Perry Township	47404	https://maps.google.com/?q=E+University+St,+Bloomington,+IN+47401,+USA&ftid=0x886c66eb7bba297b:0xf69ee3eecc0021a8	39.1601935	-86.52204809999999
 \.
 
 
@@ -610,7 +645,7 @@ COPY public.users (userid, fname, lname, username, role, address, phone, email, 
 -- Name: users_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_userid_seq', 78, true);
+SELECT pg_catalog.setval('public.users_userid_seq', 79, true);
 
 
 --
