@@ -71,19 +71,19 @@ app.use(function(err, req, res, next){
 //   port: 5432,
 // })
 
-client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'hermes',
-    password: 'adidas123',
-    port: 5432,
-});
-// const client = new Client({
-//   connectionString: process.env.DATABASE_URL,
-//   ssl: {
-//     rejectUnauthorized: false
-//   }
+// client = new Client({
+//     user: 'postgres',
+//     host: 'localhost',
+//     database: 'hermes',
+//     password: 'adidas123',
+//     port: 5432,
 // });
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 client.connect()
 
 //JS isnt an OOP language, so getting this class I created onto another file might be tricky. For now, it can live here.
